@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+# this script need gradle android hone
+
+# change this for module
+build_module=
+build_module[0]=gradlesync
+
+shell_run_path=$(cd `dirname $0`; pwd)
+
+checkEnv(){
+    evn_checker=`which $1`
+  if [ ! -n "evn_checker" ]; then
+    echo "check event [ $1 ] error exit"
+    exit 1
+  else
+    echo -e "Cli [ $1 ] event check success\n-> $1 at Path: ${evn_checker}"
+  fi
+}
+
+checkGradleModule(){
+    module_len=${#build_module[@]}
+    if [ ${module_len} -le 0 ]; then
+        echo "you set [ build_module ] is empty"
+        exit 1
+    fi
+
+    setting_gradle_path="${shell_run_path}/settings.gradle"
+    if [ -f "${setting_gradle_path}" ]; then
+        echo "Find settings gradle at: ${setting_gradle_path}"
+    else
+        echo "can not find settings gradle at ${shell_run_path} exit"
+        exit 1
+    fi
+    for module in ${build_module[@]};
+    do
+        find_module_set=`cat ${setting_gradle_path} | grep "$module"`
+        if [ ! -n "$find_module_set" ]; then
+            echo -e "check gradle module [ ${module} ] error\nYou are not setting $module at ${setting_gradle_path}"
+            exit 1
+        else
+            echo -e "check gradle module [ ${module} ] success\nAt Path: ${setting_gradle_path}\n-> setting is: ${find_module_set}"
+        fi
+        module_path="${shell_run_path}/${module}"
+        if [ ! -d "${module_path}" ]; then
+            echo -e "check gradle module [ ${module} ] error\nCode path not find\n->Set at: ${module}\n-> Want Path: ${module_path}"
+            exit 1
+        fi
+    done
+}
+
+checkEnv git
+checkEnv java
+checkEnv android
+checkEnv gradle
+checkGradleModule
+
+git status
+git pull
+git branch -v
+
+if [ ! -x "gradlew" ]; then
+    echo "this path gradlew not exec just try to fix!"
+    chmod +x gradlew
+else
+    echo "=> local gradlew can use"
+fi
+
+./gradlew -q ${build_module}:dependencies --refresh-dependencies
