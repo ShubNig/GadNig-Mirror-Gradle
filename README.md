@@ -31,19 +31,11 @@ provides :
 - check env
 - get code
 
-## jvmProbe
+## run check
 
 ```sh
-./gradlew :jvmProbe:runOutLibs
-```
-
-out jar at `./build/outLibs/jvmProbe-*.jar`
-
-- use
-
-```sh
-cd ./build/outLibs
-java -jar [params] jvmProbe-*.jar -h
+chmod +x z-gradle-refresh-dependencies
+./z-gradle-refresh-dependencies
 ```
 
 # test
